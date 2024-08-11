@@ -7,10 +7,18 @@ html, body {
   font-family: "Nanum Gothic Coding", monospace;
 }
 
+canvas { 
+  position: absolute;
+  width: 50%;
+  height: 100%;
+  z-index: 0;
+}
+
 div#canvas {
   display: inline-block;
   width: 50%;
   height: 100%;
+  background-color: transparent;
 }
 
 div#settings {
@@ -40,4 +48,6 @@ div h1 {
   cursor: grab;
   text-align: center;
   user-select: none;
+  z-index: 1;
+  background-color: white;
 }

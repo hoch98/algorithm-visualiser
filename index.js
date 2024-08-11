@@ -2,7 +2,20 @@ var canvas = document.getElementById("canvas")
 var nodeSlider = document.getElementById("nodes");
 var numOfNodes = 5;
 var nodes = [];
+var edges = []
 var dragging = false;
+
+var lineCanvas = document.querySelector('canvas');
+var context = lineCanvas.getContext('2d');
+fitToContainer();
+
+function fitToContainer(){
+  lineCanvas.width  = lineCanvas.offsetWidth;
+  lineCanvas.height = lineCanvas.offsetHeight;
+  drawEdges();
+}
+
+window.onresize = fitToContainer
 
 function elementsFromPoint(x, y) { // pointer-events: none;
   const elements = nodes;
@@ -57,27 +70,44 @@ function createNode(text) {
   return circle
 }
 
+function drawEdges() {
+  edges.forEach((edge) => {
+    var bound1 = nodes[edge[0]].getBoundingClientRect();
+    var bound2 = nodes[edge[1]].getBoundingClientRect();
+
+    context.beginPath();
+    context.moveTo(bound1.x+25, bound1.y+25);
+    context.lineTo(bound2.x+25, bound2.y+25);
+    context.stroke();
+  })
+}
+
+
 function generateNodes(n) {
   nodes = []
+  edges = []
   canvas.innerHTML = ""
   for (var i = 0; i < n; i++) {
-    var node = createNode(i)
+    var node = createNode(i);
     nodes.push(node);
     canvas.appendChild(node);
     node.onpointerdown = (event) => {
       dragging = elementsFromPoint(event.clientX, event.clientY)[0];
     }
-
-    for (var i = 0; i < nodes.length; i++) {
-      var svg = document.createElement("line")
+    for (var k = 0; k < nodes.length-1; k++) {
+      var edge = [i, k];
+      edges.push(edge);
     }
   }
+  drawEdges();
 }
 
 window.onpointermove = (event) => {
   if (dragging) {
     dragging.style.left = (event.clientX-25)+"px";
     dragging.style.top = (event.clientY-25)+"px";
+    context.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
+    drawEdges();
   }
 }
 window.onpointerup = () => {
@@ -87,6 +117,7 @@ window.onpointerup = () => {
 nodeSlider.oninput = () => {
   numOfNodes = document.getElementById("nodes").value;
   document.getElementById("numOfNodes").textContent = numOfNodes;
+  context.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
   generateNodes(numOfNodes);
 }
 
