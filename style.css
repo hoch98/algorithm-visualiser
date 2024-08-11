@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&family=Noto+Sans+Mono:wght@100..900&family=Redressed&display=swap');
+
+html, body {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  font-family: "Nanum Gothic Coding", monospace;
+}
+
+div#canvas {
+  display: inline-block;
+  width: 50%;
+  height: 100%;
+}
+
+div#settings {
+  border-left: 1px solid black;
+  display: inline-block;
+  width: 49%;
+  height: 100%;
+  vertical-align: top;
+  text-align: center;
+}
+
+div h1 {
+  font-size: 20px;
+  margin: 0;
+  padding: 15px;
+}
+
+#nodes {
+  width: 80%;
+}
+
+.node {
+  border-radius: 50%;
+  border-style: solid;
+  width: 50px;
+  height: 50px;
+  cursor: grab;
+  text-align: center;
+  user-select: none;
+}
