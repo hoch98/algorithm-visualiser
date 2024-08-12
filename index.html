@@ -7,6 +7,15 @@
   <title>Document</title>
 </head>
 <body>
+  <!-- <svg width="0" height="0" style="position:absolute;z-index:-1;">
+    <defs>
+      <filter id="remove-alpha" x="0" y="0" width="50%" height="100%">
+        <feComponentTransfer>
+          <feFuncA type="discrete" tableValues="0 1"></feFuncA>
+        </feComponentTransfer>
+        </filter>
+    </defs>
+  </svg> -->
   <canvas id="lineCanvas"></canvas>
   <div id="canvas">
   </div>
@@ -14,6 +23,7 @@
     <h1>Number of nodes: <span id="numOfNodes">3</span></h1>
     <input type="range" min="1" max="40" value="3" class="slider" id="nodes">
   </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js" integrity="sha512-CeIsOAsgJnmevfCi2C7Zsyy6bQKi43utIjdA87Q0ZY84oDqnI0uwfM9+bKiIkI75lUeI00WG/+uJzOmuHlesMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="./index.js"></script>
 </body>
 </html>

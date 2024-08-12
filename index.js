@@ -4,10 +4,26 @@ var numOfNodes = 5;
 var nodes = [];
 var edges = []
 var dragging = false;
+var selectedNode = undefined;
+var selectedEdge = undefined;
 
 var lineCanvas = document.querySelector('canvas');
 var context = lineCanvas.getContext('2d');
 fitToContainer();
+
+function deselectNode() {
+  if (selectedNode) {
+    selectedNode.classList.remove("selected");
+    selectedNode = undefined;
+  }
+}
+
+function deselectEdge() {
+  if (selectedNode) {
+    selectedEdge = undefined;
+    drawEdges();
+  }
+}
 
 function fitToContainer(){
   lineCanvas.width  = lineCanvas.offsetWidth;
@@ -71,11 +87,18 @@ function createNode(text) {
 }
 
 function drawEdges() {
+  context.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
   edges.forEach((edge) => {
     var bound1 = nodes[edge[0]].getBoundingClientRect();
     var bound2 = nodes[edge[1]].getBoundingClientRect();
-
+    
     context.beginPath();
+    context.lineWidth = 2;
+    context.strokeStyle = "black";
+    if (selectedEdge == edge) {
+      context.strokeStyle = "red";
+      context.lineWidth = 4;
+    }
     context.moveTo(bound1.x+25, bound1.y+25);
     context.lineTo(bound2.x+25, bound2.y+25);
     context.stroke();
@@ -93,6 +116,13 @@ function generateNodes(n) {
     canvas.appendChild(node);
     node.onpointerdown = (event) => {
       dragging = elementsFromPoint(event.clientX, event.clientY)[0];
+      deselectNode();
+      
+      if (selectedNode !== dragging) {
+        selectedNode = dragging;
+        selectedNode.classList.add("selected");
+        deselectEdge();
+      }
     }
     for (var k = 0; k < nodes.length-1; k++) {
       var edge = [i, k];
@@ -102,11 +132,38 @@ function generateNodes(n) {
   drawEdges();
 }
 
+lineCanvas.onpointerdown = (event) => {
+  deselectNode();
+
+  var mouse = {
+    x: event.clientX,
+    y: event.clientY
+  }
+
+  for (var i = 0; i < edges.length; i++) {
+    var edge = edges[i]
+    var bound1 = nodes[edge[0]].getBoundingClientRect();
+    var bound2 = nodes[edge[1]].getBoundingClientRect();
+
+    context.beginPath();
+    context.lineWidth = 10
+    context.moveTo(bound1.x+25, bound1.y+25);
+    context.lineTo(bound2.x+25, bound2.y+25);
+
+    if (context.isPointInStroke(mouse.x, mouse.y)) {
+      selectedEdge = edge
+      deselectNode();
+      context.lineWidth = 2
+      drawEdges();
+      break;
+    }
+  }
+}
+
 window.onpointermove = (event) => {
   if (dragging) {
     dragging.style.left = (event.clientX-25)+"px";
     dragging.style.top = (event.clientY-25)+"px";
-    context.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
     drawEdges();
   }
 }
@@ -117,7 +174,6 @@ window.onpointerup = () => {
 nodeSlider.oninput = () => {
   numOfNodes = document.getElementById("nodes").value;
   document.getElementById("numOfNodes").textContent = numOfNodes;
-  context.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
   generateNodes(numOfNodes);
 }
 

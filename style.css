@@ -51,3 +51,7 @@ div h1 {
   z-index: 1;
   background-color: white;
 }
+
+.selected {
+  background-color: yellow;
+}
