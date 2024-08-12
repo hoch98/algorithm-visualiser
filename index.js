@@ -1,7 +1,9 @@
 var canvas = document.getElementById("canvas");
 var edgeSettings = document.getElementById("edges");
 var nodes = [];
-var edges = []
+var neighbours = [];
+var edges = [];
+var visited = [];
 var dragging = false;
 var selectedNode = undefined;
 var selectedEdge = undefined;
@@ -9,6 +11,12 @@ var selectedEdge = undefined;
 var lineCanvas = document.querySelector('canvas');
 var context = lineCanvas.getContext('2d');
 fitToContainer();
+
+function isNumeric(str) {
+  if (typeof str != "string") return false // we only process strings!  
+  return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+         !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+}
 
 function selectNode(node) {
   deselectNodes();
@@ -46,7 +54,17 @@ function fitToContainer(){
 
 window.onresize = fitToContainer
 
+function addEdge(edge) {
+  neighbours[edge[0]].push(edge[1])
+  neighbours[edge[1]].push(edge[0])
+
+  edges.push([edge[0], edge[1]])
+}
 function updateEdges() {
+  neighbours = []
+  for (var i = 0; i < nodes.length; i++) {
+    neighbours.push([])
+  }
   edges = []
   for (var i = 0; i < edgeSettings.children.length; i++) {
     var child = edgeSettings.children[i];
@@ -58,7 +76,7 @@ function updateEdges() {
       inputs[1].value = "0"
     }
     
-    edges.push([parseInt(inputs[0].value), parseInt(inputs[1].value)])
+    addEdge([parseInt(inputs[0].value), parseInt(inputs[1].value)])
   }
   drawEdges();
 }
@@ -153,8 +171,15 @@ function generateNodes(n, nodeEdges=[]) {
         selectNode(dragging);
       }
     }
-    edges = nodeEdges
   }
+  neighbours = []
+  for (var i = 0; i < nodes.length; i++) {
+    neighbours.push([])
+  }
+
+  nodeEdges.forEach((edge) => {
+    addEdge(edge);
+  })
   drawEdges();
 }
 
@@ -201,7 +226,7 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function createEdgeContainer() {
+function createEdgeContainer(a=0, b=0) {
   var edgeInputContainer = document.createElement("div");
   edgeInputContainer.classList.add("edgeInputContainer");
 
@@ -216,13 +241,13 @@ function createEdgeContainer() {
   nodeIdInput.classList.add("nodeIdInput");
   nodeIdInput.setAttribute("min", 0);
   nodeIdInput.setAttribute("max", nodes.length-1);
-  nodeIdInput.value = 0
+  nodeIdInput.value = a+""
   nodeIdInput.required = true
 
   nodeInput.appendChild(nodeIdInput)
 
   var nodeInput2 = nodeInput.cloneNode(true);
-  nodeInput2.value = 0
+  nodeInput2.firstChild.value = b+""
 
   var deleteButton = document.createElement("button");
   deleteButton.classList.add("deleteButton")
@@ -245,10 +270,75 @@ function createEdgeContainer() {
 
 document.getElementById("createEdgeContainer").onclick = createEdgeContainer;
 
-async function dfs() {
-  
+async function dfs(node) {
+  var neighbour = neighbours[node];
+  nodes[node].classList.add("visited")
+  visited.push(node)
+  selectNode(nodes[node])
+  await sleep(1000)
+  for (var i = 0; i < neighbour.length; i++) {
+    var n = neighbour[i];
+    if (!visited.includes(n)) {
+      await dfs(n);
+      selectNode(nodes[node])
+      await sleep(1000);
+    }
+  }
+  deselectNodes();
 }
 
-document.getElementById("loopSwitch").onclick = dfs
+function reset() {
+  deselectNodes();
+  visited  = []
+  for (var i = 0; i < nodes.length; i++) {
+    nodes[i].classList.remove("visited");
+  }
+}
 
-generateNodes(3, []);
+document.getElementById("importEdges").onclick = () => {
+  $( '#edgeInputDialog' ).dialog({
+    resizable: true,
+    height: 500,
+    width: 200,
+    modal: true,
+    buttons: {
+      "Import": function() {
+        var lines = document.getElementById("edgeInput").value.split("\n");
+        var ed = 0
+        edges = []
+        deselectEdges();
+        edgeSettings.innerHTML = ""
+        lines.forEach((line) => {
+          var valid = true;
+          var split = line.split(" ");
+          if (split.length != 2) {
+            valid = false;
+          } if (!isNumeric(split[0]) || !isNumeric(split[1])) {
+            valid = false;
+          }
+          ;
+          if (valid) {
+            var parsedSplit = [parseInt(split[0]), parseInt(split[1])]
+            addEdge(parsedSplit);
+            createEdgeContainer(parsedSplit[0], parsedSplit[1]);
+            ed++
+          }
+        })
+        drawEdges()
+        $( this ).dialog( "close" );
+        if (ed != lines.length) {
+          alert("partially invalid edges, only imported valid ones")
+        }
+      }
+    }
+  });
+}
+
+document.getElementById("loopSwitch").onclick = () => {
+  if (selectedNode) {
+    dfs(nodes.indexOf(selectedNode));
+  } else {
+    bootbox.alert("Select a starting node")
+  }
+}
+generateNodes(5, []);

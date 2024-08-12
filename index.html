@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
   <link rel="stylesheet" href="./style.css">
   <title>Document</title>
 </head>
@@ -15,19 +16,17 @@
       <h1>Edges</h1>
       <div id="edges"></div>
       <button id="createEdgeContainer">Create new edge</button>
+      <button id="importEdges">Enter edges</button>
     </div>
     <hr>
     <button id="loopSwitch">Stop/Start Loop</button>
+    <button onclick="reset()">Reset</button>
+    <div id="edgeInputDialog" title="Import edges" style="display: none;">
+      <textarea name="edgeInput" id="edgeInput">0 1&#10;0 2&#10;1 2&#10;2 3&#10;2 4</textarea>
+    </div>
   </div>
-  <svg style="display: none;" id="trashIcon" xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-trash" width="30" height="30" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M4 7l16 0" />
-    <path d="M10 11l0 6" />
-    <path d="M14 11l0 6" />
-    <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-    <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-  </svg>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js" integrity="sha512-CeIsOAsgJnmevfCi2C7Zsyy6bQKi43utIjdA87Q0ZY84oDqnI0uwfM9+bKiIkI75lUeI00WG/+uJzOmuHlesMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+  <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js"></script>
   <script src="./index.js"></script>
 </body>
 </html>
