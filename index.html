@@ -7,22 +7,26 @@
   <title>Document</title>
 </head>
 <body>
-  <!-- <svg width="0" height="0" style="position:absolute;z-index:-1;">
-    <defs>
-      <filter id="remove-alpha" x="0" y="0" width="50%" height="100%">
-        <feComponentTransfer>
-          <feFuncA type="discrete" tableValues="0 1"></feFuncA>
-        </feComponentTransfer>
-        </filter>
-    </defs>
-  </svg> -->
   <canvas id="lineCanvas"></canvas>
   <div id="canvas">
   </div>
   <div id="settings">
-    <h1>Number of nodes: <span id="numOfNodes">3</span></h1>
-    <input type="range" min="1" max="40" value="3" class="slider" id="nodes">
+    <div id="generationSettings">
+      <h1>Edges</h1>
+      <div id="edges"></div>
+      <button id="createEdgeContainer">Create new edge</button>
+    </div>
+    <hr>
+    <button id="loopSwitch">Stop/Start Loop</button>
   </div>
+  <svg style="display: none;" id="trashIcon" xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-trash" width="30" height="30" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+    <path d="M4 7l16 0" />
+    <path d="M10 11l0 6" />
+    <path d="M14 11l0 6" />
+    <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+    <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+  </svg>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js" integrity="sha512-CeIsOAsgJnmevfCi2C7Zsyy6bQKi43utIjdA87Q0ZY84oDqnI0uwfM9+bKiIkI75lUeI00WG/+uJzOmuHlesMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="./index.js"></script>
 </body>

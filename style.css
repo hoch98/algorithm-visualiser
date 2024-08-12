@@ -50,8 +50,33 @@ div h1 {
   user-select: none;
   z-index: 1;
   background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .selected {
   background-color: yellow;
+}
+
+.nodeIdInput {
+  width: 30px;
+}
+
+.hor-line {
+  height: 0px;
+  width: 80px;
+  border-style: solid;
+}
+
+.edgeInputContainer {
+  margin-bottom: 10px;
+}
+
+.edgeInputContainer * {
+  display: inline-flex;
+}
+
+.deleteButton {
+  margin-left: 30px;
 }
