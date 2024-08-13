@@ -1,5 +1,6 @@
 var canvas = document.getElementById("canvas");
 var edgeSettings = document.getElementById("edges");
+var algorithmSelector = document.getElementById("algorithmSelector")
 var nodes = [];
 var neighbours = [];
 var edges = [];
@@ -9,8 +10,10 @@ var dragging = false;
 var selectedNode = undefined;
 var selectedEdge = undefined;
 
-var intersectionTestingCanvas1 = document.createElement("canvas");
-var intersectionTestingCanvas2 = document.createElement("canvas");
+var algorithms = {
+  "dfs": dfs,
+  "bfs": bfs
+}
 
 var lineCanvas = document.querySelector('canvas');
 var context = lineCanvas.getContext('2d');
@@ -53,10 +56,6 @@ function deselectEdges() {
 function fitToContainer(){
   lineCanvas.width  = lineCanvas.offsetWidth;
   lineCanvas.height = lineCanvas.offsetHeight;
-  intersectionTestingCanvas1.width  = lineCanvas.offsetWidth;
-  intersectionTestingCanvas1.height = lineCanvas.offsetHeight;
-  intersectionTestingCanvas2.width  = lineCanvas.offsetWidth;
-  intersectionTestingCanvas2.height = lineCanvas.offsetHeight;
   drawEdges();
 }
 
@@ -212,7 +211,7 @@ function drawQuadraticEdges() {
       orientation = -orientation;
     }
 
-    var offsetHeight = distance(point1, point2)/3;
+    var offsetHeight = distance(point1, point2)/4;
 
     var center = {x: (startPoint.x+endPoint.x)/2, y: (startPoint.y+endPoint.y)/2};
     var angle = Math.atan((startPoint.y-endPoint.y)/(startPoint.x-endPoint.x));
@@ -366,12 +365,20 @@ async function dfs(node) {
   deselectNodes();
 }
 
-function reset() {
-  deselectNodes();
+async function bfs() {
+
+}
+
+function reset(ignoreNode=false) {
+  if (!ignoreNode) {
+    deselectNodes();
+  }
   quadraticEdges = []
   visited  = []
   for (var i = 0; i < nodes.length; i++) {
-    nodes[i].classList.remove("visited");
+    if (nodes[i].classList.contains("visited")) {
+      nodes[i].classList.remove("visited");
+    }
   }
   drawEdges();
 }
@@ -417,7 +424,11 @@ document.getElementById("importEdges").onclick = () => {
 
 document.getElementById("loopSwitch").onclick = () => {
   if (selectedNode) {
-    dfs(nodes.indexOf(selectedNode));
+    var selection = algorithmSelector.value;
+    reset(true);
+    if (selection == "dfs") {
+      algorithms["dfs"](nodes.indexOf(selectedNode))
+    }
   } else {
     alert("Select a starting node")
   }

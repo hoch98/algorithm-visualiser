@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
   <link rel="stylesheet" href="./style.css">
-  <title>Document</title>
+  <title>Algorithm Visualizer</title>
 </head>
 <body>
   <canvas id="lineCanvas"></canvas>
@@ -19,8 +19,12 @@
       <button id="importEdges">Enter edges</button>
     </div>
     <hr>
-    <button id="loopSwitch">Stop/Start Loop</button>
-    <button onclick="reset()">Reset</button>
+    <select name="algorithm" id="algorithmSelector">
+      <option value="dfs">Depth first search</option>
+      <option value="bfs">Breadth first search</option>
+    </select>
+    <button id="loopSwitch">Run</button>
+    <button onclick="reset()">Reset node states</button>
     <div id="edgeInputDialog" title="Import edges" style="display: none;">
       <textarea name="edgeInput" id="edgeInput">0 1&#10;0 2&#10;1 2&#10;2 3&#10;2 4</textarea>
     </div>
