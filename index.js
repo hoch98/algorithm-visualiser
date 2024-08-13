@@ -3,6 +3,7 @@ var edgeSettings = document.getElementById("edges");
 var nodes = [];
 var neighbours = [];
 var edges = [];
+var quadraticEdges = [];
 var visited = [];
 var dragging = false;
 var selectedNode = undefined;
@@ -151,6 +152,41 @@ function drawEdges() {
     context.lineTo(bound2.x+25, bound2.y+25);
     context.stroke();
   })
+  drawQuadraticEdges();
+}
+
+function distance(p1, p2) {
+  return Math.sqrt(Math.pow(p1.x-p2.x, 2)+Math.pow(p1.y-p2.y, 2))
+}
+
+function drawQuadraticEdges() {
+  quadraticEdges.forEach((edge) => {
+    var point1 = nodes[edge[0]].getBoundingClientRect();
+    var point2 = nodes[edge[1]].getBoundingClientRect();
+    point1 = {x: point1.x+25, y: point1.y+25};
+    point2 = {x: point2.x+25, y: point2.y+25};
+    var orientation = -1;
+    if (point1.x > point2.x) {
+      orientation = 1;
+    }
+
+    var center = {x: (point1.x+point2.x)/2, y: (point1.y+point2.y)/2};
+    var angle = Math.atan((point1.y-point2.y)/(point1.x-point2.x));
+    var point3 = {x: center.x+100*orientation*Math.cos(angle+Math.PI/2), y: center.y+100*orientation*Math.sin(angle+Math.PI/2)}
+
+    context.beginPath();
+    context.moveTo(point1.x, point1.y);
+    context.quadraticCurveTo(point3.x, point3.y, point2.x, point2.y)
+    context.stroke();
+    
+    var angle = Math.atan((point2.y - point3.y)/(point2.x - point3.x))
+
+    var arrowPointLocation = {x: point3.x+25*Math.cos(angle), y: point3.y+25*Math.sin(angle)}
+    
+    context.beginPath();
+    context.rect(arrowPointLocation.x, arrowPointLocation.y, 10, 10);
+    context.fill();
+  })
 }
 
 
@@ -184,7 +220,7 @@ function generateNodes(n, nodeEdges=[]) {
 }
 
 lineCanvas.onpointerdown = (event) => {
-
+  deselectEdges();
   deselectNodes();
 
   var mouse = {
@@ -289,10 +325,12 @@ async function dfs(node) {
 
 function reset() {
   deselectNodes();
+  quadraticEdges = []
   visited  = []
   for (var i = 0; i < nodes.length; i++) {
     nodes[i].classList.remove("visited");
   }
+  drawEdges();
 }
 
 document.getElementById("importEdges").onclick = () => {
@@ -338,7 +376,7 @@ document.getElementById("loopSwitch").onclick = () => {
   if (selectedNode) {
     dfs(nodes.indexOf(selectedNode));
   } else {
-    bootbox.alert("Select a starting node")
+    alert("Select a starting node")
   }
 }
 generateNodes(5, []);
