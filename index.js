@@ -9,6 +9,9 @@ var dragging = false;
 var selectedNode = undefined;
 var selectedEdge = undefined;
 
+var intersectionTestingCanvas1 = document.createElement("canvas");
+var intersectionTestingCanvas2 = document.createElement("canvas");
+
 var lineCanvas = document.querySelector('canvas');
 var context = lineCanvas.getContext('2d');
 fitToContainer();
@@ -50,6 +53,10 @@ function deselectEdges() {
 function fitToContainer(){
   lineCanvas.width  = lineCanvas.offsetWidth;
   lineCanvas.height = lineCanvas.offsetHeight;
+  intersectionTestingCanvas1.width  = lineCanvas.offsetWidth;
+  intersectionTestingCanvas1.height = lineCanvas.offsetHeight;
+  intersectionTestingCanvas2.width  = lineCanvas.offsetWidth;
+  intersectionTestingCanvas2.height = lineCanvas.offsetHeight;
   drawEdges();
 }
 
@@ -159,33 +166,67 @@ function distance(p1, p2) {
   return Math.sqrt(Math.pow(p1.x-p2.x, 2)+Math.pow(p1.y-p2.y, 2))
 }
 
+function drawArrowhead(locx, locy, angle, sizex, sizey) {
+  var hx = sizex / 2;
+  var hy = sizey / 2;
+
+  context.translate((locx ), (locy));
+  context.rotate(angle);
+  context.translate(-hx,-hy);
+
+  context.beginPath();
+  context.moveTo(0,0);
+  context.lineTo(0,1*sizey);    
+  context.lineTo(1*sizex,1*hy);
+  context.closePath();
+  context.fill();
+
+  context.translate(hx,hy);
+  context.rotate(-angle);
+  context.translate(-locx,-locy);
+}        
+
+// returns radians
+function findAngle(sx, sy, ex, ey) {
+  return Math.atan2((ey - sy), (ex - sx));
+}
+
 function drawQuadraticEdges() {
   quadraticEdges.forEach((edge) => {
     var point1 = nodes[edge[0]].getBoundingClientRect();
     var point2 = nodes[edge[1]].getBoundingClientRect();
     point1 = {x: point1.x+25, y: point1.y+25};
     point2 = {x: point2.x+25, y: point2.y+25};
-    var orientation = -1;
-    if (point1.x > point2.x) {
-      orientation = 1;
+    var orientation = 1;
+    if (point1.x >= point2.x) {
+      orientation = -orientation;
     }
 
-    var center = {x: (point1.x+point2.x)/2, y: (point1.y+point2.y)/2};
     var angle = Math.atan((point1.y-point2.y)/(point1.x-point2.x));
-    var point3 = {x: center.x+100*orientation*Math.cos(angle+Math.PI/2), y: center.y+100*orientation*Math.sin(angle+Math.PI/2)}
+    var angleOffset = Math.PI/4
+    var startPoint = {x: point1.x+25*orientation*Math.cos(angle-angleOffset), y: point1.y+25*orientation*Math.sin(angle-angleOffset)}
+    var endPoint = {x: point2.x+35*-orientation*Math.cos(angle+angleOffset), y: point2.y+35*-orientation*Math.sin(angle+angleOffset)}
+    
+    var orientation = -1;
+    if (startPoint.x >= endPoint.x) {
+      orientation = -orientation;
+    }
+
+    var offsetHeight = distance(point1, point2)/3;
+
+    var center = {x: (startPoint.x+endPoint.x)/2, y: (startPoint.y+endPoint.y)/2};
+    var angle = Math.atan((startPoint.y-endPoint.y)/(startPoint.x-endPoint.x));
+    var point3 = {x: center.x+offsetHeight*orientation*Math.cos(angle+Math.PI/2), y: center.y+offsetHeight*orientation*Math.sin(angle+Math.PI/2)}
 
     context.beginPath();
-    context.moveTo(point1.x, point1.y);
-    context.quadraticCurveTo(point3.x, point3.y, point2.x, point2.y)
+    context.lineWidth = 2;
+    context.moveTo(startPoint.x, startPoint.y);
+    context.quadraticCurveTo(point3.x, point3.y, endPoint.x, endPoint.y)
     context.stroke();
-    
-    var angle = Math.atan((point2.y - point3.y)/(point2.x - point3.x))
 
-    var arrowPointLocation = {x: point3.x+25*Math.cos(angle), y: point3.y+25*Math.sin(angle)}
-    
-    context.beginPath();
-    context.rect(arrowPointLocation.x, arrowPointLocation.y, 10, 10);
-    context.fill();
+    var angle = findAngle(point3.x, point3.y, endPoint.x, endPoint.y);
+    context.fillRect(endPoint.x, endPoint.y, 2, 2);
+    drawArrowhead(endPoint.x, endPoint.y, angle, 12, 12);
   })
 }
 
@@ -316,6 +357,8 @@ async function dfs(node) {
     var n = neighbour[i];
     if (!visited.includes(n)) {
       await dfs(n);
+      quadraticEdges.push([n, node])
+      drawQuadraticEdges();
       selectNode(nodes[node])
       await sleep(1000);
     }
