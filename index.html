@@ -5,11 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
   <link rel="stylesheet" href="./style.css">
+  <base href=".">
   <title>Algorithm Visualizer</title>
 </head>
 <body>
-  <canvas id="lineCanvas"></canvas>
-  <div id="canvas">
+  <div class="canvasWrapper">
+    <canvas id="lineCanvas"></canvas>
+    <div id="canvas"></div>
+    <hr>
+    <div id="detailLists">
+      <div class="listItem">
+        <h1>Traversal Order:</h1>
+        <hr>
+        <div class="detailList" id="traversalOrder"></div>
+      </div>
+      <div class="listItem" id="">
+        <h1>Visited Nodes:</h1>
+        <hr>
+        <div class="detailList" id="visitedNodes"></div>
+      </div>
+      <div class="listItem">
+        <h1>Queued Nodes:</h1>
+        <hr>
+        <div class="detailList" id="queuedNodes"></div>
+      </div>
+    </div>
   </div>
   <div id="settings">
     <div id="generationSettings">
@@ -24,13 +44,13 @@
       <option value="bfs">Breadth first search</option>
     </select>
     <button id="loopSwitch">Run</button>
-    <button onclick="reset()">Reset node states</button>
+    <button id="resetButton">Reset node states</button>
     <div id="edgeInputDialog" title="Import edges" style="display: none;">
       <textarea name="edgeInput" id="edgeInput">0 1&#10;0 2&#10;1 2&#10;2 3&#10;2 4</textarea>
     </div>
   </div>
   <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
   <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js"></script>
-  <script src="./index.js"></script>
+  <script type="module" src="./index.js"></script>
 </body>
 </html>

@@ -1,12 +1,22 @@
+import Queue from "./classes/queue.js";
+
 var canvas = document.getElementById("canvas");
 var edgeSettings = document.getElementById("edges");
 var algorithmSelector = document.getElementById("algorithmSelector")
+
+var traversalOrder = document.getElementById("traversalOrder");
+var visitedNodes = document.getElementById("visitedNodes");
+var queuedNodes = document.getElementById("queuedNodes");
+
 var nodes = [];
 var neighbours = [];
 var edges = [];
 var quadraticEdges = [];
 var visited = [];
+var order = [];
+var queued = new Queue();
 var dragging = false;
+var running = false;
 var selectedNode = undefined;
 var selectedEdge = undefined;
 
@@ -18,6 +28,37 @@ var algorithms = {
 var lineCanvas = document.querySelector('canvas');
 var context = lineCanvas.getContext('2d');
 fitToContainer();
+
+function updateDetailLists() {
+  traversalOrder.innerHTML = ""
+  queuedNodes.innerHTML = ""
+  visitedNodes.innerHTML = ""
+  var t;
+
+  for (var i = 0; i < order.length; i++) {
+    t = document.createElement("h1");
+    t.innerText = order[i];
+    
+    traversalOrder.appendChild(t);
+  }
+
+  for (var i = 0; i < visited.length; i++) {
+    t = document.createElement("h1");
+    t.innerText = visited[i];
+    
+    visitedNodes.appendChild(t);
+  }
+
+  var queueKeys = Object.keys(queued.items);
+  var index;
+  for (var i = 0; i < queueKeys.length; i++) {
+    index = queueKeys[i];
+    t = document.createElement("h1");
+    t.innerText = queued.items[index];
+    
+    queuedNodes.appendChild(t);
+  }
+}
 
 function isNumeric(str) {
   if (typeof str != "string") return false // we only process strings!  
@@ -120,7 +161,7 @@ function isOverlapping(x, y) {
 }
 
 function getRandomCoords() {
-  return{x: Math.floor(Math.random() * 500), y: Math.floor(Math.random() * 500)};
+  return{x: Math.floor(Math.random() * (canvas.offsetWidth-100))+50, y: Math.floor(Math.random() * (canvas.offsetHeight-50))};
 }
 
 function createNode(text) {
@@ -202,7 +243,7 @@ function drawQuadraticEdges() {
     }
 
     var angle = Math.atan((point1.y-point2.y)/(point1.x-point2.x));
-    var angleOffset = Math.PI/4
+    var angleOffset = Math.PI/8
     var startPoint = {x: point1.x+25*orientation*Math.cos(angle-angleOffset), y: point1.y+25*orientation*Math.sin(angle-angleOffset)}
     var endPoint = {x: point2.x+35*-orientation*Math.cos(angle+angleOffset), y: point2.y+35*-orientation*Math.sin(angle+angleOffset)}
     
@@ -233,12 +274,19 @@ function drawQuadraticEdges() {
 function generateNodes(n, nodeEdges=[]) {
   nodes = []
   edges = []
-  canvas.innerHTML = ""
+  for (var i = 0; i < canvas.children.length; i++) {
+    var child = canvas.children[i]
+    if (child.classList.contains("node")) {
+      canvas.removeChild(child);
+    }
+  }
   for (var i = 0; i < n; i++) {
     var node = createNode(i);
     nodes.push(node);
     canvas.appendChild(node);
     node.onpointerdown = (event) => {
+      if (running) return;
+
       dragging = elementsFromPoint(event.clientX, event.clientY)[0];
 
       deselectNodes();
@@ -260,6 +308,8 @@ function generateNodes(n, nodeEdges=[]) {
 }
 
 lineCanvas.onpointerdown = (event) => {
+  if (running) return;
+
   deselectEdges();
   deselectNodes();
 
@@ -349,8 +399,10 @@ document.getElementById("createEdgeContainer").onclick = createEdgeContainer;
 async function dfs(node) {
   var neighbour = neighbours[node];
   nodes[node].classList.add("visited")
+  order.push(node)
   visited.push(node)
   selectNode(nodes[node])
+  updateDetailLists();
   await sleep(1000)
   for (var i = 0; i < neighbour.length; i++) {
     var n = neighbour[i];
@@ -358,7 +410,9 @@ async function dfs(node) {
       await dfs(n);
       quadraticEdges.push([n, node])
       drawQuadraticEdges();
-      selectNode(nodes[node])
+      selectNode(nodes[node]);
+      order.push("return -> "+node)
+      updateDetailLists();
       await sleep(1000);
     }
   }
@@ -366,15 +420,18 @@ async function dfs(node) {
 }
 
 async function bfs() {
-
+  
 }
 
 function reset(ignoreNode=false) {
+  if (running) return;
   if (!ignoreNode) {
     deselectNodes();
   }
-  quadraticEdges = []
-  visited  = []
+  quadraticEdges = [];
+  visited  = [];
+  order = [];
+  queued = new Queue();
   for (var i = 0; i < nodes.length; i++) {
     if (nodes[i].classList.contains("visited")) {
       nodes[i].classList.remove("visited");
@@ -382,6 +439,8 @@ function reset(ignoreNode=false) {
   }
   drawEdges();
 }
+
+document.getElementById("resetButton").onclick = reset
 
 document.getElementById("importEdges").onclick = () => {
   $( '#edgeInputDialog' ).dialog({
@@ -423,14 +482,18 @@ document.getElementById("importEdges").onclick = () => {
 }
 
 document.getElementById("loopSwitch").onclick = () => {
-  if (selectedNode) {
-    var selection = algorithmSelector.value;
-    reset(true);
-    if (selection == "dfs") {
-      algorithms["dfs"](nodes.indexOf(selectedNode))
+  var selection = algorithmSelector.value;
+  reset(true);
+  running = true;
+  if (selection == "dfs") {
+    if (!selectedNode) {
+      alert("Select a starting node");
+      return;
     }
-  } else {
-    alert("Select a starting node")
+    algorithms["dfs"](nodes.indexOf(selectedNode)).then(() => {running = false;})
+  } if (selection == "bfs") {
+    
+    algorithms["bfs"]().then(() => {running = false;})
   }
 }
 generateNodes(5, []);
