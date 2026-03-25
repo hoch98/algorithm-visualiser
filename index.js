@@ -473,6 +473,22 @@ function reset(ignoreNode=false) {
 
 document.getElementById("resetButton").onclick = reset
 
+document.getElementById("addNode").onclick = () => {
+  if (running) return;
+  const index = nodes.length;
+  const node = createNode(index);
+  nodes.push(node);
+  neighbours.push([]);
+  canvas.appendChild(node);
+  node.onpointerdown = (event) => {
+    if (running) return;
+    dragging = elementsFromPoint(event.clientX, event.clientY)[0];
+    deselectNodes();
+    if (selectedNode !== dragging) selectNode(dragging);
+  };
+  drawEdges();
+};
+
 document.getElementById("importEdges").onclick = () => {
   $( '#edgeInputDialog' ).dialog({
     resizable: true,
