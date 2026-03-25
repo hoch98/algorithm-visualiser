@@ -5,8 +5,7 @@ Allows you to try out different graph traversal algorithms (dfs, bfs, etc)
 
 Somehow 90% of the project so far has been trying to figure out how to make a curved arrow between 2 nodes.
 
-Currently, only depth first search has been implemented.
-
+Currently, only depth first search and breadth first search has been implemented.
 
 
 ## Features
@@ -20,8 +19,6 @@ Currently, only depth first search has been implemented.
 ## To-Do
 
 - Implement more algorithms
-
-- Implement changing number of nodes
 
 - Dark mode would be cool
 
