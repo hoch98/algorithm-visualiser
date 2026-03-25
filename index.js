@@ -420,7 +420,38 @@ async function dfs(node) {
 }
 
 async function bfs() {
-  
+  if (!selectedNode) {
+    alert("Select a starting node");
+    running = false;
+    return;
+  }
+
+  const startIndex = nodes.indexOf(selectedNode);
+  queued.enqueue(startIndex);
+  nodes[startIndex].classList.add("visited");
+  visited.push(startIndex);
+
+  while (queued.frontIndex !== queued.backIndex) {
+    const current = queued.dequeue();
+
+    order.push(current);
+    selectNode(nodes[current]);
+    updateDetailLists();
+    await sleep(1000);
+
+    const neighbour = neighbours[current];
+    for (let i = 0; i < neighbour.length; i++) {
+      const n = neighbour[i];
+      if (!visited.includes(n)) {
+        visited.push(n);
+        nodes[n].classList.add("visited");
+        queued.enqueue(n);
+        updateDetailLists();
+      }
+    }
+  }
+
+  deselectNodes();
 }
 
 function reset(ignoreNode=false) {
